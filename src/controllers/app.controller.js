@@ -1,7 +1,8 @@
 const App = require('../models/app.model');
 
 exports.create = (req, res) => {
-    if(!req.body.name || !req.body.developer || !req.body.email) {
+    console.log(req.body);
+    if(!(req.body.name || req.body.developer || req.body.email)) {
         return res.status(400).send({
             message: "Field cannot be empty"
         });
@@ -31,3 +32,21 @@ exports.show = (req, res) => {
           }
     });
 };
+
+exports.edit = (req, res) => {
+    App.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, app) {
+        if (err) {
+            return next(err);
+        }
+        res.send('App udpated.');
+    });
+};
+
+exports.delete = (req, res) => {
+    App.findByIdAndRemove(req.params.id, function(err) {
+        if (err) {
+            return next(err);
+        }
+        res.send('Deleted successfully!');
+    });
+}
