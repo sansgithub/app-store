@@ -2,7 +2,7 @@ const App = require('../models/app.model');
 
 exports.create = (req, res) => {
     console.log(req.body);
-    if(!(req.body.name || req.body.developer || req.body.email)) {
+    if(!(req.body.name || req.body.developer)) {
         return res.status(400).send({
             message: "Field cannot be empty"
         });
@@ -10,7 +10,8 @@ exports.create = (req, res) => {
     const app = new App({
         name: req.body.name, 
         developer: req.body.developer,
-        email: req.body.email
+        email: req.body.email,
+        createdBy: req.body.id
     });
 
     app.save()
@@ -48,5 +49,15 @@ exports.delete = (req, res) => {
             return next(err);
         }
         res.send('Deleted successfully!');
+    });
+}
+
+exports.showMyApps = (req, res) => {
+    App.find({createdBy: req.params.user_id} ,null, function(err, result){
+        if (err) {
+            res.send(err);
+          } else {
+            res.send(result);
+          }
     });
 }

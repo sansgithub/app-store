@@ -11,9 +11,15 @@ const appSchema = new Schema({
         required: true
     },
     email:{
+        type: String
+    },
+    status:{
+        type:Boolean,
+        default: false
+    },
+    createdBy:{
         type: String,
-        unique: true,
-        required: true
+        default: null
     }
 });
 
