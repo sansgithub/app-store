@@ -11,12 +11,11 @@ const PORT = process.env.PORT;
 InitiateMongoServer();
 dotenv.config();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit:50000}));
 app.use(appRouter);
 app.use(userRouter);
-
 
 app.listen(PORT, ()=>{
     console.log(`Server has started at ${PORT}`);

@@ -1,17 +1,21 @@
 const App = require('../models/app.model');
 
 exports.create = (req, res) => {
-    console.log(req.body);
-    if(!(req.body.name || req.body.developer)) {
+    if(!(req.body.name || req.body.developer || req.file)) {
         return res.status(400).send({
             message: "Field cannot be empty"
         });
     }
+
+    
+    let icon_path =  'icons/' + req.file.originalname;
+    
     const app = new App({
         name: req.body.name, 
         developer: req.body.developer,
         email: req.body.email,
-        createdBy: req.body.id
+        createdBy: req.body.id,
+        icon: icon_path
     });
 
     app.save()
@@ -54,6 +58,16 @@ exports.delete = (req, res) => {
 
 exports.showMyApps = (req, res) => {
     App.find({createdBy: req.params.user_id} ,null, function(err, result){
+        if (err) {
+            res.send(err);
+          } else {
+            res.send(result);
+          }
+    });
+}
+
+exports.searchApp = (req, res) => {
+    App.find({name:{ $regex: req.params.app_name, $options: 'i' }}, function(err, result){
         if (err) {
             res.send(err);
           } else {

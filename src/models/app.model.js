@@ -20,6 +20,10 @@ const appSchema = new Schema({
     createdBy:{
         type: String,
         default: null
+    },
+    icon:{
+        type: String,
+        required: true
     }
 });
 

@@ -79,3 +79,13 @@ exports.login = async (req, res) => {
         }
     );
 }
+
+exports.searchUser = (req, res) => {
+    User.find({name:{ $regex: req.params.user_name, $options: 'i' }}, function(err, result){
+        if (err) {
+            res.send(err);
+          } else {
+            res.send(result);
+          }
+    });
+}

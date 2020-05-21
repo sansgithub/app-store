@@ -12,5 +12,6 @@ router.post('/api/signup',[
 );
 
 router.post('/api/login', user.login);
+router.get('/api/usearch/:user_name', user.searchUser);
 
 module.exports = router;
