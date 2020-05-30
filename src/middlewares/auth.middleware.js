@@ -13,8 +13,7 @@ const token = bearer[1];
       if (err) {
         res.status(401).send('Unauthorized: Invalid token');
       } else {
-          req.body.id = decoded.id;
-          req.body.email = decoded.email;
+          req.user = decoded;
         next();
       }
     });

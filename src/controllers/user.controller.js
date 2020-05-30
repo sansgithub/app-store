@@ -1,45 +1,45 @@
-const { validationResult} = require('express-validator');
+const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
-exports.signup =  async (req, res) => {
-        const errors = validationResult(req);
-        if(!errors.isEmpty()) {
+exports.signup = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
+    const email = req.body.email;
+    const password = req.body.password;
+
+    try {
+        let user = await User.findOne({
+            email
+        });
+        if (user) {
             return res.status(400).json({
-                errors: errors.array()
+                message: "User already exists"
             });
         }
-        
-        const email = req.body.email;
-        const password = req.body.password;
 
-        try{
-            let user = await User.findOne({
-                email
-            });
-            if(user){
-                return res.status(400).json({
-                    message: "User already exists"
-                });
-            }
+        user = new User({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password
+        });
 
-            user = new User({
-                name: req.body.name,
-                email: req.body.email,
-                password: req.body.password
-            });
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
 
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
+        await user.save();
+        res.send("User Created");
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Error in Saving");
+    }
 
-            await user.save();
-            res.send("User Created");
-        } catch (err) {
-            console.log(err.message);
-            res.status(500).send("Error in Saving");
-        }
-    
 };
 
 exports.login = async (req, res) => {
@@ -47,12 +47,12 @@ exports.login = async (req, res) => {
     const password = req.body.password;
 
     const errors = validationResult(req);
-    if(!errors.isEmpty()) {
+    if (!errors.isEmpty()) {
         return res.status(400).json({
             errors: errors.array()
         });
     }
-    let user = await User.findOne({email});
+    let user = await User.findOne({ email });
     if (!user) {
         return res.status(400).send('Incorrect email or password.');
     }
@@ -60,17 +60,18 @@ exports.login = async (req, res) => {
     if (!validPassword) {
         return res.status(400).send('Incorrect email or password.');
     }
- 
+
     const payload = {
         id: user.id,
-        email: user.email
+        email: user.email,
+        role: user.role
     };
 
     jwt.sign(
         payload,
         process.env.JWT_SECRET, {
-            expiresIn: 10000
-        },
+        expiresIn: 10000
+    },
         (err, token) => {
             if (err) throw err;
             res.status(200).json({
@@ -81,11 +82,39 @@ exports.login = async (req, res) => {
 }
 
 exports.searchUser = (req, res) => {
-    User.find({name:{ $regex: req.params.user_name, $options: 'i' }}, function(err, result){
+    User.find({ name: { $regex: req.params.user_name, $options: 'i' } }, function (err, result) {
         if (err) {
             res.send(err);
-          } else {
+        } else {
             res.send(result);
-          }
+        }
     });
 }
+
+exports.deleteUser = (req, res) => {
+    if(req.user.id == '5ece339ba935d9109cf9f4c8'){
+        User.findByIdAndRemove(req.params.id, function (err) {
+            if (err) {
+                return next(err);
+            }
+            res.send('User deleted successfully!');
+        });
+    }else{
+        res.send('You donot have permission');
+    }
+}
+
+exports.showUsers = (req, res) => {
+    User.find({}, function (err, result) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send(result);
+        }
+    });
+};
+
+exports.updateProfile = (req, res) => {
+    res.send(req.user.id);
+};
+

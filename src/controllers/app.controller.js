@@ -1,20 +1,20 @@
 const App = require('../models/app.model');
 
+
 exports.create = (req, res) => {
     if(!(req.body.name || req.body.developer || req.file)) {
         return res.status(400).send({
             message: "Field cannot be empty"
         });
     }
-
     
     let icon_path =  'icons/' + req.file.originalname;
     
     const app = new App({
         name: req.body.name, 
         developer: req.body.developer,
-        email: req.body.email,
-        createdBy: req.body.id,
+        email: req.user.email,
+        createdBy: req.user.id,
         icon: icon_path
     });
 
@@ -39,21 +39,43 @@ exports.show = (req, res) => {
 };
 
 exports.edit = (req, res) => {
-    App.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, app) {
-        if (err) {
+    App.findById(req.params.app_id, function (err, current_app) {
+        if(err){
             return next(err);
+        }else{
+            if(req.user.id == current_app.createdBy || req.user.id == "5ece339ba935d9109cf9f4c8")  {
+                current_app.updateOne({ $set: req.body }, (err) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.send('Edit successfull!');
+                });
+            } else{
+                res.send("current user cannot edit");
+            }  
         }
-        res.send('App udpated.');
     });
 };
 
-exports.delete = (req, res) => {
-    App.findByIdAndRemove(req.params.id, function(err) {
-        if (err) {
+exports.delete = (req, res) => {       
+    App.findById(req.params.app_id, function (err, current_app) {
+        if(err){
             return next(err);
+        }else{
+            if(req.user.id == current_app.createdBy || req.user.id == "5ece339ba935d9109cf9f4c8")  {
+                current_app.deleteOne((err) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.send('Deleted successfully!');
+                });
+            } else{
+                res.send("current user cannot delete");
+            }  
         }
-        res.send('Deleted successfully!');
     });
+    
+    
 }
 
 exports.showMyApps = (req, res) => {
@@ -74,4 +96,6 @@ exports.searchApp = (req, res) => {
             res.send(result);
           }
     });
+
+
 }
