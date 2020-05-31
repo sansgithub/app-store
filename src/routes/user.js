@@ -14,5 +14,7 @@ router.post('/api/signup',[
 router.post('/api/login', user.login);
 router.get('/api/usearch/:user_name', user.searchUser);
 //router.delete('/api/delete_user/:id', user.deleteUser);
+router.post('/api/confirmation', user.confirmEmail);
+router.post('/api/resend', user.resendToken);
 
 module.exports = router;
