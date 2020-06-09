@@ -1,23 +1,23 @@
 const App = require('../models/app.model');
+var express = require('express');
 
-
+//user/admin can create app
 exports.create = (req, res) => {
+    console.log('running');
     if(!(req.body.name || req.body.developer || req.file)) {
         return res.status(400).send({
             message: "Field cannot be empty"
         });
     }
-    
-    let icon_path =  'icons/' + req.file.originalname;
-    
+       
     const app = new App({
         name: req.body.name, 
         developer: req.body.developer,
         email: req.user.email,
         createdBy: req.user.id,
-        icon: icon_path
+        icon: req.files["icon"][0].path,
+        screenshots : req.files["screenshots"].map(m=>m.path),
     });
-
     app.save()
     .then(data => {
         res.send(data);
@@ -28,6 +28,7 @@ exports.create = (req, res) => {
     });
 };
 
+//admin can view approved apps
 exports.show = (req, res) => {
     App.find({}, function (err, result) {
         if (err) {
@@ -38,6 +39,7 @@ exports.show = (req, res) => {
     });
 };
 
+//user/admin can edit his own app
 exports.edit = (req, res) => {
     App.findById(req.params.app_id, function (err, current_app) {
         if(err){
@@ -57,6 +59,7 @@ exports.edit = (req, res) => {
     });
 };
 
+//user/admin can delete his own app
 exports.delete = (req, res) => {       
     App.findById(req.params.app_id, function (err, current_app) {
         if(err){
@@ -78,6 +81,7 @@ exports.delete = (req, res) => {
     
 }
 
+//user can view his own app
 exports.showMyApps = (req, res) => {
     App.find({createdBy: req.params.user_id} ,null, function(err, result){
         if (err) {
@@ -88,6 +92,7 @@ exports.showMyApps = (req, res) => {
     });
 }
 
+//admin can search app
 exports.searchApp = (req, res) => {
     App.find({name:{ $regex: req.params.app_name, $options: 'i' }}, function(err, result){
         if (err) {

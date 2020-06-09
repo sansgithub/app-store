@@ -24,7 +24,10 @@ const appSchema = new Schema({
     icon:{
         type: String,
         required: true
-    }
+    },
+    screenshots:[{
+        type: String
+    }]
 });
 
 module.exports = mongoose.model('AppModel', appSchema);
